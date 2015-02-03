@@ -23,7 +23,7 @@ canShootTimerMax = 0.2
 canShootTimer = canShootTimerMax
 
 -- enemies
-createEnemyTimerMax = 0.4
+createEnemyTimerMax = 0.6
 createEnemyTimer = createEnemyTimerMax
 
 --Image storage
@@ -45,6 +45,10 @@ function love.load(arg)
 end
 
 function love.update(dt)
+
+
+
+
 	-- a way to exit game
 	if love.keyboard.isDown('escape') then
 		love.event.push('quit')
@@ -85,7 +89,7 @@ function love.update(dt)
 	------------------
 	
 	-- enemies ----------------
-	createEnemyTimer = createEnemyTimer - (1*dt)
+	createEnemyTimer = createEnemyTimer - (1*dt) -- how fast enemies spawn
 	if createEnemyTimer < 0 then
 		createEnemyTimer = createEnemyTimerMax
 		
@@ -112,7 +116,7 @@ function love.update(dt)
 				bullet.x, bullet.y, bullet.img:getWidth(), bullet.img:getHeight()) then
 				table.remove(bullets, j)
 				table.remove(enemies, i)
-				score  = score+1*dt
+				score  = score + 1
 			end
 		end
 		
@@ -148,7 +152,9 @@ end
 
 function love.draw(dt)
 	-- draw function must be called in here
+	--- printing stats
 	if isAlive then
+		love.graphics.print("Score: " ..score, love.graphics:getWidth()-70, 10)
 		love.graphics.draw(player.img, player.x, player.y)
 	else
 		love.graphics.print("Press 'R' to restart", love.graphics:getWidth()/2-50, love.graphics:getHeight()/2-10)
