@@ -28,6 +28,7 @@ createEnemyTimer = createEnemyTimerMax
 
 --Image storage
 bulletImg = nil
+numOfBullets = 0
 enemyImg = nil
 
 -- Entity Storage
@@ -37,7 +38,7 @@ enemies = {}
 -- these three functions are called by the Love engine
 -- update and draw will be called every frame, taking dt(deltaTime)
 function love.load(arg)
-	player = { x=200, y=710, speed=150, health=5, img=nil}
+	player = { x=200, y=710, speed=200, health=5, maxBullets = 5, img=nil}
 	player.img = love.graphics.newImage('assets/plane.png')
 	bulletImg = love.graphics.newImage('assets/blue_bullet.png')
 	enemyImg = love.graphics.newImage('assets/enemy_1.png')
@@ -54,9 +55,9 @@ function love.update(dt)
 		love.event.push('quit')
 	end
 	
-	-- shooting
+	-- shooting -----------------------------------
 	canShootTimer = canShootTimer - (1 * dt)
-	if canShootTimer < 0 then
+	if canShootTimer < 0 and numOfBullets <= player.maxBullets then
 		canShoot = true
 	end
 	
@@ -84,17 +85,20 @@ function love.update(dt)
 	
 	if love.keyboard.isDown(' ') and canShoot then
 		-- create new bullets
-		newBullet = { x = player.x + (player.img:getWidth()/2), y = player.y, img = bulletImg}
+		newBullet = { x = player.x + (player.img:getWidth()/2)-3, y = player.y, img = bulletImg}
 		table.insert(bullets, newBullet)
+		numOfBullets = numOfBullets+1
 		canShoot = false
 		canShootTimer = canShootTimerMax
 	end
 	
 	-- bullets --------
 	for i, bullet in ipairs(bullets)do
-		bullet.y = bullet.y - (250 * dt)
+	-- speed for bullets
+		bullet.y = bullet.y - (300 * dt)
 		if bullet.y < 0 then -- remove bullets off screen
 			table.remove(bullets,i)
+			numOfBullets = numOfBullets-1
 		end
 	end
 	------------------
@@ -111,7 +115,8 @@ function love.update(dt)
 	end
 	
 	for i, enemy in ipairs(enemies) do
-		enemy.y = enemy.y + (200*dt)
+	-- speed of enemies
+		enemy.y = enemy.y + (150*dt)
 		
 		if enemy.y > 850 then -- remove the enemy
 			table.remove(enemies,i)
@@ -128,6 +133,7 @@ function love.update(dt)
 				table.remove(bullets, j)
 				table.remove(enemies, i)
 				score  = score + 1
+				numOfBullets = numOfBullets-1
 			end
 		end
 		
