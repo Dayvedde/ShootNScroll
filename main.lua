@@ -21,6 +21,7 @@ score = 0
 canShoot = true
 canShootTimerMax = 0.2
 canShootTimer = canShootTimerMax
+numOfBullets = 0
 
 -- enemies
 createEnemyTimerMax = 0.6
@@ -28,27 +29,28 @@ createEnemyTimer = createEnemyTimerMax
 
 --Image storage
 bulletImg = nil
-numOfBullets = 0
 enemyImg = nil
+goldImg = nil
 
 -- Entity Storage
 bullets = {} -- array of current bullets being drawn and updated
 enemies = {}
+golds = {}
 
 -- these three functions are called by the Love engine
 -- update and draw will be called every frame, taking dt(deltaTime)
 function love.load(arg)
-	player = { x=200, y=710, speed=200, health=5, maxBullets = 5, img=nil}
+	player = {x=200, y=710, speed=200, 
+			  health=5, maxBullets = 5, 
+			  gold = 0, img=nil}
 	player.img = love.graphics.newImage('assets/plane.png')
 	bulletImg = love.graphics.newImage('assets/blue_bullet.png')
 	enemyImg = love.graphics.newImage('assets/enemy_1.png')
+	goldImg = love.graphics.newImage('assets/gold_1.png')
 	-- have an asset ready to be used inside Love
 end
 
 function love.update(dt)
-
-
-
 
 	-- a way to exit game
 	if love.keyboard.isDown('escape') then
@@ -92,6 +94,15 @@ function love.update(dt)
 		canShootTimer = canShootTimerMax
 	end
 	
+	--- gold------
+	for i, gp in ipairs(golds) do
+		gp.y = gp.y + (100*dt)
+		if gp.y > love.graphics.getHeight() then
+			table.remove(golds, i)
+		end
+	end
+	
+	
 	-- bullets --------
 	for i, bullet in ipairs(bullets)do
 	-- speed for bullets
@@ -130,10 +141,21 @@ function love.update(dt)
 		for j, bullet in ipairs(bullets) do
 			if CheckCollision(enemy.x, enemy.y, enemy.img:getWidth(), enemy.img:getHeight(),
 				bullet.x, bullet.y, bullet.img:getWidth(), bullet.img:getHeight()) then
+				
+				----------- Gold 
+				randX = math.random(enemy.x, enemy.x+enemy.img:getWidth()) 
+				randY = math.random(enemy.y, enemy.y + enemy.img:getHeight())
+				newGold = {x = randX, y = randY, value = 2, img = goldImg}
+				table.insert(golds, newGold)
+				
+				
 				table.remove(bullets, j)
 				table.remove(enemies, i)
 				score  = score + 1
 				numOfBullets = numOfBullets-1
+				
+				------ drop gold ------
+				
 			end
 		end
 		
@@ -148,12 +170,21 @@ function love.update(dt)
 		end
 	end
 	
+	for i, gp in ipairs(golds) do
+		if CheckCollision(gp.x, gp.y, gp.img:getWidth(), gp.img:getHeight(),
+			player.x, player.y, player.img:getWidth(), player.img:getHeight()) then
+			player.gold = player.gold + gp.value
+			table.remove(golds, i)
+		end
+	end
+	
 	
 	-- resetting the game
 	if not isAlive and love.keyboard.isDown('r') then
 		-- remove all our bullets and enemies from screen
 		bullets = {}
 		enemies = {}
+		golds = {}
 
 		-- reset timers
 		canShootTimer = canShootTimerMax
@@ -191,5 +222,9 @@ function love.draw(dt)
 		love.graphics.draw(enemy.img, enemy.x, enemy.y)
 	end
 	
+	---- draw gold
+	for i, gp in ipairs(golds) do
+		love.graphics.draw(gp.img, gp.x, gp.y)
+	end
 	
 end
