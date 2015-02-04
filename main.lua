@@ -37,7 +37,7 @@ enemies = {}
 -- these three functions are called by the Love engine
 -- update and draw will be called every frame, taking dt(deltaTime)
 function love.load(arg)
-	player = { x=200, y=710, speed=150, img=nil}
+	player = { x=200, y=710, speed=150, health=5, img=nil}
 	player.img = love.graphics.newImage('assets/plane.png')
 	bulletImg = love.graphics.newImage('assets/blue_bullet.png')
 	enemyImg = love.graphics.newImage('assets/enemy_1.png')
@@ -69,6 +69,17 @@ function love.update(dt)
 		if player.x < (love.graphics.getWidth() - player.img:getWidth()) then
 			player.x = player.x + (player.speed*dt)
 		end
+	elseif love.keyboard.isDown('up', 'w') then	
+		if player.y > (love.graphics.getHeight()/2) then	
+			player.y = player.y - (player.speed*dt)
+		end
+	elseif love.keyboard.isDown('down', 's') then
+		if player.y < (love.graphics.getHeight() - player.img:getHeight()) then
+			player.y = player.y + (player.speed * dt)
+		end
+	-- cheats
+	elseif love.keyboard.isDown('g') then
+		player.health = player.health + 10
 	end
 	
 	if love.keyboard.isDown(' ') and canShoot then
@@ -94,7 +105,7 @@ function love.update(dt)
 		createEnemyTimer = createEnemyTimerMax
 		
 		-- Create Enemy
-		randomNumber = math.random(10, love.graphics.getWidth()-10)
+		randomNumber = math.random(10, love.graphics.getWidth()-100)
 		newEnemy = { x = randomNumber, y = -10, img = enemyImg}
 		table.insert(enemies, newEnemy)
 	end
@@ -124,7 +135,10 @@ function love.update(dt)
 				player.x, player.y, player.img:getWidth(), player.img:getHeight())
 			and isAlive then
 			table.remove(enemies, i)
-			isAlive = false
+			player.health = player.health - 1
+			if player.health == 0 then
+				isAlive = false
+			end
 		end
 	end
 	
@@ -142,10 +156,12 @@ function love.update(dt)
 		-- move player back to default position
 		player.x = 50
 		player.y = 710
+		player.health=5
 
 		-- reset our game state
 		score = 0
 		isAlive = true
+		playerHealth=5
 	end
 end
 
@@ -155,6 +171,7 @@ function love.draw(dt)
 	--- printing stats
 	if isAlive then
 		love.graphics.print("Score: " ..score, love.graphics:getWidth()-70, 10)
+		love.graphics.print ("Health: "..player.health, 10, 10)
 		love.graphics.draw(player.img, player.x, player.y)
 	else
 		love.graphics.print("Press 'R' to restart", love.graphics:getWidth()/2-50, love.graphics:getHeight()/2-10)
