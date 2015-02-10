@@ -26,16 +26,20 @@ numOfBullets = 0
 -- enemies
 createEnemyTimerMax = 0.6
 createEnemyTimer = createEnemyTimerMax
+spawnBoss = false
+
 
 --Image storage
 bulletImg = nil
 enemyImg = nil
 goldImg = nil
+bossImg = nil
 
 -- Entity Storage
 bullets = {} -- array of current bullets being drawn and updated
 enemies = {}
 golds = {}
+bossBullets = {}
 
 -- these three functions are called by the Love engine
 -- update and draw will be called every frame, taking dt(deltaTime)
@@ -47,6 +51,7 @@ function love.load(arg)
 	bulletImg = love.graphics.newImage('assets/blue_bullet.png')
 	enemyImg = love.graphics.newImage('assets/enemy_1.png')
 	goldImg = love.graphics.newImage('assets/gold_1.png')
+	bossImg = love.graphics.newImage('assets/boss1.png')
 	-- have an asset ready to be used inside Love
 end
 
@@ -113,16 +118,29 @@ function love.update(dt)
 		end
 	end
 	------------------
+		
+	if score > 5 and spawnBoss == false then
+		spawnBoss = true
+		boss1 = {x = 200, y = -10, img = bossImg}
+	end
+	
+	if spawnBoss == true then
+		if boss1.y < 100 then
+			boss1.y  = boss1.y + (100*dt)
+		end
+	end
 	
 	-- enemies ----------------
-	createEnemyTimer = createEnemyTimer - (1*dt) -- how fast enemies spawn
-	if createEnemyTimer < 0 then
-		createEnemyTimer = createEnemyTimerMax
-		
-		-- Create Enemy
-		randomNumber = math.random(10, love.graphics.getWidth()-100)
-		newEnemy = { x = randomNumber, y = -10, img = enemyImg}
-		table.insert(enemies, newEnemy)
+	if spawnBoss == false then 
+		createEnemyTimer = createEnemyTimer - (1*dt) -- how fast enemies spawn
+		if createEnemyTimer < 0 then
+			createEnemyTimer = createEnemyTimerMax
+			
+			-- Create Enemy
+			randomNumber = math.random(10, love.graphics.getWidth()-100)
+			newEnemy = { x = randomNumber, y = -10, img = enemyImg}
+			table.insert(enemies, newEnemy)
+		end
 	end
 	
 	for i, enemy in ipairs(enemies) do
@@ -225,6 +243,11 @@ function love.draw(dt)
 	---- draw gold
 	for i, gp in ipairs(golds) do
 		love.graphics.draw(gp.img, gp.x, gp.y)
+	end
+	
+	---- draw boss1
+	if spawnBoss == true then
+		love.graphics.draw(bossImg, boss1.x, boss1.y)
 	end
 	
 end
